@@ -16,27 +16,22 @@ namespace D2L.ApachePhoenixSQL.Tokenizer {
 
 			do {
 				var prevCtx = ctx;
-				ctx = Step( ctx, s );
+				ctx = Step( prevCtx, s );
 
 				done = ctx.Index == s.Length;
 
-				if( ctx.NewToken || ( done && ctx.State != TokenizerState.BEGIN ) ) {
-					int length;
-					if ( done ) {
-						length = ctx.Index - ctx.StartIndex;
-					} else {
-						length = ctx.Index - prevCtx.StartIndex;
-					}
+				ctx.Index++;
 
+				if( ctx.NewToken || ( done && ctx.State != TokenizerState.BEGIN ) ) {
 					string val = s.Substring(
 						startIndex: prevCtx.StartIndex,
-						length: length
+						length: prevCtx.Index - prevCtx.StartIndex
 					);
 
 					yield return new Token(
 						type: StateToTokenType( prevCtx.State ),
 						val: val
-					);
+						);
 				}
 	 		} while( !done ) ;
 		}
@@ -47,16 +42,21 @@ namespace D2L.ApachePhoenixSQL.Tokenizer {
 		) {
 			ctx.NewToken = false;
 
-			char c = s[ctx.Index];
+			if (ctx.Index == s.Length) {
+				if (ctx.State != TokenizerState.BEGIN) {
+					ctx.Emit();
+				}
+				return ctx;
+			}
 
-			ctx.Index++;
+			char c = s[ctx.Index];
 
 			switch(  ctx.State ) {
 				case TokenizerState.BEGIN:
 					if (IsIdentChar( c ) ) {
 						ctx.State = TokenizerState.IDENTIFIER;
 					} else if (Char.IsWhiteSpace( c ) ) {
-						return ctx;
+						// Ignore whitespace
 					} else if (Char.IsDigit( c ) ) {
 						ctx.State = TokenizerState.NUMBER;
 					} else {
@@ -69,11 +69,11 @@ namespace D2L.ApachePhoenixSQL.Tokenizer {
 								throw new NotImplementedException();
 						}
 					}
-					ctx.StartIndex = ctx.Index - 1;
+					ctx.StartIndex = ctx.Index;
 					return ctx;
 
 				case TokenizerState.IDENTIFIER:
-					if (IsIdentChar( c )  || Char.IsDigit( c ) ) {
+					if (IsIdentChar( c ) || Char.IsDigit( c ) ) {
 						return ctx;	
 					}
 					ctx.Emit();
