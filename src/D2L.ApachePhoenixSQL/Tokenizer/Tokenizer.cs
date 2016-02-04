@@ -12,14 +12,25 @@ namespace D2L.ApachePhoenixSQL.Tokenizer {
 				State = TokenizerState.BEGIN
 			};
 
+			bool done = false;
+
 			do {
 				var prevCtx = ctx;
 				ctx = Step( ctx, s );
 
-				if( ctx.NewToken ) {
+				done = ctx.Index == s.Length;
+
+				if( ctx.NewToken || ( done && ctx.State != TokenizerState.BEGIN ) ) {
+					int length;
+					if ( done ) {
+						length = ctx.Index - ctx.StartIndex;
+					} else {
+						length = ctx.Index - prevCtx.StartIndex;
+					}
+
 					string val = s.Substring(
-						startIndex: prevCtx.StartIndex - 1,
-						length: ctx.StartIndex - prevCtx.StartIndex
+						startIndex: prevCtx.StartIndex,
+						length: length
 					);
 
 					yield return new Token(
@@ -27,7 +38,7 @@ namespace D2L.ApachePhoenixSQL.Tokenizer {
 						val: val
 					);
 				}
-			} while( ctx.Index != s.Length );
+	 		} while( !done ) ;
 		}
 
 		private static TokenizerContext Step(
@@ -58,7 +69,7 @@ namespace D2L.ApachePhoenixSQL.Tokenizer {
 								throw new NotImplementedException();
 						}
 					}
-					ctx.StartIndex = ctx.Index;
+					ctx.StartIndex = ctx.Index - 1;
 					return ctx;
 
 				case TokenizerState.IDENTIFIER:

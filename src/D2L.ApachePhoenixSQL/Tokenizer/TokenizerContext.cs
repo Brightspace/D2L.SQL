@@ -10,8 +10,8 @@
 		/// </summary>
 		public void Emit() {
 			State = TokenizerState.BEGIN;
-			StartIndex = Index;
 			Index -= 1;
+			StartIndex = Index;
 			NewToken = true;
 		}
 	}
