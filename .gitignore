@@ -1,0 +1,12 @@
+bin
+obj
+packages
+docs/output
+*.suo
+*.user
+*.nupkg
+*.orig
+*.DotSettings
+*.lock.json
+.nuget/NuGet.exe
+*.exe

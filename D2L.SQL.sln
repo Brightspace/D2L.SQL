@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D2L.SQL.Validation", "src\D2L.SQL.Validation\D2L.SQL.Validation.csproj", "{21B8E223-6665-482B-BA8F-E29B10CC5B58}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{FBFDA698-8C5C-4842-A491-A39BBD12B669}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D2L.SQL.UnitTests", "test\D2L.SQL.UnitTests\D2L.SQL.UnitTests.csproj", "{1586AAE6-10C0-44FE-AD2E-59DFE3A8BE4E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{21B8E223-6665-482B-BA8F-E29B10CC5B58} = {21B8E223-6665-482B-BA8F-E29B10CC5B58}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D2L.SQL.IntegrationTests", "test\D2L.SQL.IntegrationTests\D2L.SQL.IntegrationTests.csproj", "{2C707212-9DA7-4A9D-A119-4CE0E6137F4F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{21B8E223-6665-482B-BA8F-E29B10CC5B58} = {21B8E223-6665-482B-BA8F-E29B10CC5B58}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{21B8E223-6665-482B-BA8F-E29B10CC5B58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21B8E223-6665-482B-BA8F-E29B10CC5B58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21B8E223-6665-482B-BA8F-E29B10CC5B58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21B8E223-6665-482B-BA8F-E29B10CC5B58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1586AAE6-10C0-44FE-AD2E-59DFE3A8BE4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1586AAE6-10C0-44FE-AD2E-59DFE3A8BE4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1586AAE6-10C0-44FE-AD2E-59DFE3A8BE4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1586AAE6-10C0-44FE-AD2E-59DFE3A8BE4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C707212-9DA7-4A9D-A119-4CE0E6137F4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C707212-9DA7-4A9D-A119-4CE0E6137F4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C707212-9DA7-4A9D-A119-4CE0E6137F4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C707212-9DA7-4A9D-A119-4CE0E6137F4F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1586AAE6-10C0-44FE-AD2E-59DFE3A8BE4E} = {FBFDA698-8C5C-4842-A491-A39BBD12B669}
+		{2C707212-9DA7-4A9D-A119-4CE0E6137F4F} = {FBFDA698-8C5C-4842-A491-A39BBD12B669}
+	EndGlobalSection
+EndGlobal
