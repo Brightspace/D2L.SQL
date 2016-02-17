@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Language\SqlGrammar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Validation\ApachePhoenix\SystemTableBlacklistPolicy.cs" />
     <Compile Include="Validation\ITablePolicy.cs" />
     <Compile Include="Validation\IValidator.cs" />
     <Compile Include="Validation\SqlValidationException.cs" />
