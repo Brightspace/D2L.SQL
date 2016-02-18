@@ -1,17 +1,26 @@
 ﻿using System;
+using D2L.SQL.Validation;
 using Irony.Parsing;
 
 namespace D2L.SQL.Language {
 	[Language( "D2L-SQL", "0.1", "D2L-flavored Read-Only SQL" )]
 	internal sealed class SqlGrammar : Grammar {
+
+		private readonly ITablePolicy m_tablePolicy;
+
+		private readonly Parser m_parser;
+
 		public SqlGrammar()
-			: base( caseSensitive: false )
-		{
+			: base( caseSensitive: false ) {
+
 			#region Terminals
 			var comment = new CommentTerminal( "comment", "/*", "*/" );
+			comment.Priority = TerminalPriority.High;
 			var lineComment = new CommentTerminal( "line_comment", "--", "\n", "\r\n" );
+			var slashComment = new CommentTerminal( "slash_comment", "//", "\n", "\r\n" );
 			NonGrammarTerminals.Add( comment );
 			NonGrammarTerminals.Add( lineComment );
+			NonGrammarTerminals.Add( slashComment );
 			var number = new NumberLiteral( "number" );
 			number.DefaultIntTypes = new TypeCode[] { TypeCode.Int64 };
 			var string_literal = new StringLiteral( "string", "'", StringOptions.AllowsDoubledQuote );
@@ -173,7 +182,7 @@ namespace D2L.SQL.Language {
 			// FROM
 			from.Rule = FROM + tableSpec;
 			tableSpec.Rule = aliasedTableRef | "(" + select + ")" + asOpt;
-			aliasedTableRef.Rule = Id + asOpt;
+			aliasedTableRef.Rule = Id_simple + asOpt;
 
 			// JOIN
 			joinChainOpt.Rule = MakeStarRule( joinChainOpt, join );
@@ -206,7 +215,7 @@ namespace D2L.SQL.Language {
 			booleanCondition.Rule = notOpt + condition;
 			notOpt.Rule = Empty | NOT;
 			condition.Rule = operand + conditionRhsOpt;
-			conditionRhsOpt.Rule = Empty | opLevel8 + operand | IS + (Empty | NOT) + NULL; // TODO: rhs operand not operand
+			conditionRhsOpt.Rule = Empty | opLevel8 + operand | IS + ( Empty | NOT ) + NULL; // TODO: rhs operand not operand
 			operand.Rule = value | column;
 			value.Rule = string_literal | number;
 			column.Rule = Id;
@@ -214,15 +223,64 @@ namespace D2L.SQL.Language {
 			opLevel8.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;
 
 			// Id
-			Id.Rule = Id_simple + (Empty | dot + Id_simple);
+			Id.Rule = Id_simple + ( Empty | dot + Id_simple );
 			idlist.Rule = MakePlusRule( idlist, comma, Id );
 
 			#endregion
 
 			MarkPunctuation( ",", "(", ")" );
 			MarkPunctuation( semiOpt, asKeywordOpt );
-			base.MarkTransient( stmt, aliasOpt, asKeywordOpt, stmtLine, unOp, tuple );
+			MarkTransient( stmt, aliasOpt, asKeywordOpt, stmtLine, unOp, tuple );
 			binOp.SetFlag( TermFlags.InheritPrecedence );
+
+			#region Parser setup
+
+			m_parser = new Parser( this );
+
+			#endregion
+		}
+
+		public ITablePolicy TablePolicy {
+			get { return m_tablePolicy; }
+		}
+
+		public ParseTree Parse( string sql ) {
+			ParseTree parseTree = m_parser.Parse( sql );
+
+			if( parseTree.Root == null ) {
+				throw new SqlValidationException( parseTree.ParserMessages );
+			}
+
+			CheckTables( parseTree.Root );
+
+			return parseTree;
+		}
+
+		private void CheckTables( ParseTreeNode node ) {
+			if( node.Term != null && node.Term.Name == TableRefTermName ) {
+				Token startToken = node.ChildNodes[0].Token;
+				string table = startToken.ValueString;
+				string schema = null;
+
+				if( node.ChildNodes[1].ChildNodes.Count > 0 ) {
+					schema = table;
+					table = node.ChildNodes[1].ChildNodes[1].Token.ValueString;
+					Console.WriteLine(schema + "." + table);
+				}
+
+				if( !m_tablePolicy.CheckIfTableIsAllowed( schema, table ) ) {
+					throw new SqlValidationException( String.Format(
+						"at {0}, Table reference is not allowed: {1}.{2}",
+						startToken.Location,
+						schema,
+						table
+					) );
+				}
+			}
+
+			foreach( ParseTreeNode childNode in node.ChildNodes ) {
+				CheckTables( childNode );
+			}
 		}
 	}
 }

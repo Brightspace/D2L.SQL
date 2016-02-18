@@ -1,19 +1,11 @@
 ﻿using D2L.SQL.Language;
-using Irony.Parsing;
 
 namespace D2L.SQL.Validation {
 	/// <summary>
 	/// A configurable validator for read-only (i.e. SELECTs) SQL
 	/// </summary>
 	public sealed class ReadOnlyValidator : IValidator {
-		private readonly ITablePolicy m_tablePolicy;
-		private readonly Parser m_parser;
-
-		private sealed class DefaultTablePolicy : ITablePolicy {
-			public bool CheckIfTableIsAllowed( string schema, string tableName ) {
-				return true;
-			}
-		}
+		private readonly SqlGrammar m_grammar;
 
 		/// <summary>
 		/// Construct a ReadOnlyValidator 
@@ -22,17 +14,12 @@ namespace D2L.SQL.Validation {
 		public ReadOnlyValidator(
 			ITablePolicy tablePolicy = null
 		) {
-			m_tablePolicy = tablePolicy ?? new DefaultTablePolicy();
-			m_parser = new Parser( new SqlGrammar() );
+			m_grammar = new SqlGrammar( tablePolicy );
 		}
 
 		/// <inheritdoc/>
 		string IValidator.Sanitize( string sql ) {
-			ParseTree parseTree = m_parser.Parse( sql );
-			
-			if( parseTree.Root == null ) {
-				throw new SqlValidationException();
-			}
+			m_grammar.Parse( sql );
 
 			return sql;
 		}
@@ -41,7 +28,8 @@ namespace D2L.SQL.Validation {
 		/// The tables to allow reads from (FROM, JOIN etc.)
 		/// </summary>
 		public ITablePolicy TablePolicy {
-			get { return m_tablePolicy; }
+			get { return m_grammar.TablePolicy; }
 		}
 	}
+
 }

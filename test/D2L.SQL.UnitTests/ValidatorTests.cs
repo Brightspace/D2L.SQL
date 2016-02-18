@@ -1,4 +1,5 @@
 ﻿using D2L.SQL.Validation;
+using D2L.SQL.Validation.ApachePhoenix;
 using NUnit.Framework;
 
 namespace D2L.SQL.UnitTests {
@@ -10,7 +11,7 @@ namespace D2L.SQL.UnitTests {
 
 		[SetUp]
 		public void BeforeAll() {
-			m_validator = new ReadOnlyValidator();
+			m_validator = new ReadOnlyValidator( new SystemTableBlacklistPolicy() );
 		}
 
 		[TestCase( "SELECT * FROM atable" )]
@@ -20,17 +21,25 @@ namespace D2L.SQL.UnitTests {
 					-- line comment
 						other
 					FROM atable" )]
+		[TestCase( "SELECT * FROM atable // a comment" )]
+		[TestCase( @"SELECT * FROM /* a
+						multiline
+						comment */ atable" )]
 		[TestCase( "SELECT * FROM table WHERE col IS NULL" )]
+		[TestCase( "SELECT * FROM schema.table" )]
+		[TestCase( "SELECT * FROM \"SCHEMA\".table" )]
 		[TestCase( "SELECT * FROM table WHERE col IS NOT NULL" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable) ON table.a = othertable.b" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable)/* internal comment */ ON table.a = othertable.b" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable) ON table.a = othertable.b LEFT OUTER JOIN (SELECT a,b FROM THIRDTABLE WHERE a = 5) ON table.c = THIRDTABLE.x;" )]
-		[TestCase( @"/* BDP 10.5.8+ Query */ SELECT ORGUNITID AS COURSE, ROLEID AS ROLE, TOOLID AS TOOL, TIMESTAMP, V AS NUM_ACCESSES FROM TOOL_ACCESS_BY_COURSE_ROLE_TOOL;" )]
+		[TestCase( @"/* comment here */ SELECT ORGUNITID AS COURSE, ROLEID AS ROLE, TOOLID AS TOOL, TIMESTAMP, V AS NUM_ACCESSES FROM TOOL_ACCESS_BY_COURSE_ROLE_TOOL;" )]
 		[TestCase( "SELECT TV1.TAGV AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 AS LC WHERE TIMESTAMP>=142007044000;" )]
-		[TestCase( "/* BDP 10.5.8+ Query */ SELECT ROLEID AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 WHERE TIMESTAMP>=142007044000;" )]
-		[TestCase( "SELECT TV1.TAGV AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 AS LC LEFT OUTER JOIN VBSPACE_UIDS UID ON LC.ROLEID = UID.UID WHERE TIMESTAMP>=142007044000;" )]
-		[TestCase( "/* BDP 10.5.7 and older Query */ SELECT TV1.TAGV AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 AS LC LEFT OUTER JOIN (SELECT UID, TAGV FROM VBSPACE_UIDS WHERE TAGV IS NOT NULL) TV1 ON LC.ROLEID = TV1.UID WHERE TIMESTAMP>=142007044000;" )]
-		[TestCase(@"/* BDP 10.5.7 and older Query */
+		[TestCase( "SELECT ROLEID AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 WHERE TIMESTAMP>=142007044000;" )]
+		[TestCase( "SELECT TV1.TAGV AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 AS LC LEFT OUTER JOIN VBSPACE_UIDS UID " +
+				   "ON LC.ROLEID = UID.UID WHERE TIMESTAMP>=142007044000;" )]
+		[TestCase( "SELECT TV1.TAGV AS ROLE, TIMESTAMP, V AS LOGINCOUNT FROM VBSPACE_EVENTS_AGGR_218 AS LC " +
+				   "LEFT OUTER JOIN (SELECT UID, TAGV FROM VBSPACE_UIDS WHERE TAGV IS NOT NULL) TV1 ON LC.ROLEID = TV1.UID WHERE TIMESTAMP>=142007044000;" )]
+		[TestCase(@"/* multiline query */
 
 					SELECT
 
@@ -42,7 +51,7 @@ namespace D2L.SQL.UnitTests {
 
 					TIMESTAMP,
 
-					V AS NUM_ACCESSES
+					V AS NUM_ACCESSES -- ignore
 
 					FROM TOOL_ACCESS_BY_COURSE_ROLE_TOOL AS TA
 
@@ -51,9 +60,33 @@ namespace D2L.SQL.UnitTests {
 					LEFT OUTER JOIN (SELECT UID, TAGV FROM VBSPACE_UIDS WHERE TAGV IS NOT NULL) TV2 ON TA.ROLEID= TV2.UID
 
 					LEFT OUTER JOIN (SELECT UID, TAGV FROM VBSPACE_UIDS WHERE TAGV IS NOT NULL) TV3 ON TA.TOOLID= TV3.UID;")]
+		[TestCase( "SELECT info as theInfo, other FROM atable GROUP BY x HAVING y = 4 AND g IS NOT NULL ORDER BY time" )]
 		public void SanitizeReturnsInput_GivenValidSql( string sql ) {
 			// The interface doesn't actually guarantee that the output equals the input, but this is the easiest test given the current implementation
 			Assert.That( m_validator.Sanitize( sql ), Is.EqualTo( sql ) );
+		}
+
+		[TestCase( "" )]
+		[TestCase( "DELETE FROM TABLE" )]
+		[TestCase( "UPDATE STATISTICS table" )]
+		[TestCase( "ALTER INDEX a ON sometable REBUILD" )]
+		[TestCase( "DROP INDEX a ON sometable REBUILD" )]
+		[TestCase( "CREATE SEQUENCE seq" )]
+		[TestCase( "DROP VIEW criticalview" )]
+		[TestCase( "UPSERT INTO table VALUES (1, 2, 3)" )]
+		public void SanitizeThrows_GivenInvalidSql( string sql ) {
+			Assert.Throws<SqlValidationException>( () => m_validator.Sanitize( sql ) );
+		}
+
+		[TestCase( "select * from SYSTEM.table" )]
+		[TestCase( "select * from table t JOIN system.STATS as sneak ON t.id = sneak.id;" )]
+		[TestCase( "select * from (SELECT * FROM System.STATS)" )]
+		[TestCase( "SELECT A, B AS C FROM /* despite the comment */ \"SYSTEM\".secrets" )]
+		[TestCase( "SELECT A, B AS C FROM SYSTEM/* despite the comment */.secrets" )]
+		[TestCase( "SELECT A, B AS C FROM \"/*despite the comment */SYS/*---*/TEM/* despite all comments */\".secrets" )]
+		[TestCase( "SELECT A, B AS C FROM \"SYSTEM/* despite the comment */\".secrets" )]
+		public void SanitizeThrows_IfASystemTableIsReferenced( string sql ) {
+			Assert.Throws<SqlValidationException>( () => m_validator.Sanitize( sql ) );
 		}
 	}
 }
