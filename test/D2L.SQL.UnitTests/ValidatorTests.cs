@@ -1,5 +1,4 @@
 ﻿using D2L.SQL.Validation;
-using D2L.SQL.Validation.ApachePhoenix;
 using NUnit.Framework;
 
 namespace D2L.SQL.UnitTests {
@@ -11,7 +10,7 @@ namespace D2L.SQL.UnitTests {
 
 		[SetUp]
 		public void BeforeAll() {
-			m_validator = new ReadOnlyValidator( new SystemTableBlacklistPolicy() );
+			m_validator = new ReadOnlyValidator();
 		}
 
 		[TestCase( "SELECT * FROM atable" )]
@@ -26,8 +25,6 @@ namespace D2L.SQL.UnitTests {
 						multiline
 						comment */ atable" )]
 		[TestCase( "SELECT * FROM table WHERE col IS NULL" )]
-		[TestCase( "SELECT * FROM schema.table" )]
-		[TestCase( "SELECT * FROM \"SCHEMA\".table" )]
 		[TestCase( "SELECT * FROM table WHERE col IS NOT NULL" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable) ON table.a = othertable.b" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable)/* internal comment */ ON table.a = othertable.b" )]
@@ -79,6 +76,7 @@ namespace D2L.SQL.UnitTests {
 		}
 
 		[TestCase( "select * from SYSTEM.table" )]
+		[TestCase( "select any, thing as t from anyschema.table" )]
 		[TestCase( "select * from table t JOIN system.STATS as sneak ON t.id = sneak.id;" )]
 		[TestCase( "select * from (SELECT * FROM System.STATS)" )]
 		[TestCase( "SELECT A, B AS C FROM /* despite the comment */ \"SYSTEM\".secrets" )]

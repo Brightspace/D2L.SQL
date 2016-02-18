@@ -1,14 +1,9 @@
 ﻿using System;
-using D2L.SQL.Validation;
 using Irony.Parsing;
 
 namespace D2L.SQL.Language {
 	[Language( "D2L-SQL", "0.1", "D2L-flavored Read-Only SQL" )]
 	internal sealed class SqlGrammar : Grammar {
-
-		private readonly ITablePolicy m_tablePolicy;
-
-		private readonly Parser m_parser;
 
 		public SqlGrammar()
 			: base( caseSensitive: false ) {
@@ -232,55 +227,6 @@ namespace D2L.SQL.Language {
 			MarkPunctuation( semiOpt, asKeywordOpt );
 			MarkTransient( stmt, aliasOpt, asKeywordOpt, stmtLine, unOp, tuple );
 			binOp.SetFlag( TermFlags.InheritPrecedence );
-
-			#region Parser setup
-
-			m_parser = new Parser( this );
-
-			#endregion
-		}
-
-		public ITablePolicy TablePolicy {
-			get { return m_tablePolicy; }
-		}
-
-		public ParseTree Parse( string sql ) {
-			ParseTree parseTree = m_parser.Parse( sql );
-
-			if( parseTree.Root == null ) {
-				throw new SqlValidationException( parseTree.ParserMessages );
-			}
-
-			CheckTables( parseTree.Root );
-
-			return parseTree;
-		}
-
-		private void CheckTables( ParseTreeNode node ) {
-			if( node.Term != null && node.Term.Name == TableRefTermName ) {
-				Token startToken = node.ChildNodes[0].Token;
-				string table = startToken.ValueString;
-				string schema = null;
-
-				if( node.ChildNodes[1].ChildNodes.Count > 0 ) {
-					schema = table;
-					table = node.ChildNodes[1].ChildNodes[1].Token.ValueString;
-					Console.WriteLine(schema + "." + table);
-				}
-
-				if( !m_tablePolicy.CheckIfTableIsAllowed( schema, table ) ) {
-					throw new SqlValidationException( String.Format(
-						"at {0}, Table reference is not allowed: {1}.{2}",
-						startToken.Location,
-						schema,
-						table
-					) );
-				}
-			}
-
-			foreach( ParseTreeNode childNode in node.ChildNodes ) {
-				CheckTables( childNode );
-			}
 		}
 	}
 }
