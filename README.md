@@ -1,5 +1,7 @@
 # D2L.SQL
 
+[![Build status](https://ci.appveyor.com/api/projects/status/7mshe7enqhr12037/branch/master?svg=true)](https://ci.appveyor.com/project/Brightspace/d2l-sql/branch/master)
+
 C# libraries for handling SQL.
 
 ## Libraries
