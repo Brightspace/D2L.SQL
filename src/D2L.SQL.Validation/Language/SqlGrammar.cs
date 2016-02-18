@@ -2,7 +2,7 @@
 using Irony.Parsing;
 
 namespace D2L.SQL.Language {
-	[Language( "D2L-SQL", "0.1", "D2L-flavored SQL" )]
+	[Language( "D2L-SQL", "0.1", "D2L-flavored Read-Only SQL" )]
 	internal sealed class SqlGrammar : Grammar {
 		public SqlGrammar()
 			: base( caseSensitive: false )
@@ -95,6 +95,7 @@ namespace D2L.SQL.Language {
 			var aliasOpt = new NonTerminal( "aliasOpt" );
 			var tuple = new NonTerminal( "tuple" );
 			var joinChainOpt = new NonTerminal( "joinChainOpt" );
+			var join = new NonTerminal( "join" );
 			var joinKindOpt = new NonTerminal( "joinKindOpt" );
 			var condition = new NonTerminal( "condtion" );
 			var conditionRhsOpt = new NonTerminal( "conditionRhsOpt" );
@@ -120,7 +121,6 @@ namespace D2L.SQL.Language {
 			var allFamily = new NonTerminal( "allFamily" );
 			var joinDir = new NonTerminal( "joinDir" );
 			var outerOpt = new NonTerminal( "outerOpt" );
-			var nullCheckExprRhs = new NonTerminal( "nullCheckExprRhs" );
 			var expression2 = new NonTerminal( "expression2" );
 			var expression3 = new NonTerminal( "expression3" );
 			var selectExpr = new NonTerminal( "selectExpr" );
@@ -176,7 +176,8 @@ namespace D2L.SQL.Language {
 			aliasedTableRef.Rule = Id + asOpt;
 
 			// JOIN
-			joinChainOpt.Rule = Empty | joinKindOpt + JOIN + tableSpec + ON + expression;
+			joinChainOpt.Rule = MakeStarRule( joinChainOpt, join );
+			join.Rule = joinKindOpt + JOIN + tableSpec + ON + expression;
 			joinKindOpt.Rule = Empty | INNER | joinDir + outerOpt;
 			joinDir.Rule = LEFT | RIGHT;
 			outerOpt.Rule = Empty | OUTER;
@@ -205,9 +206,9 @@ namespace D2L.SQL.Language {
 			booleanCondition.Rule = notOpt + condition;
 			notOpt.Rule = Empty | NOT;
 			condition.Rule = operand + conditionRhsOpt;
-			conditionRhsOpt.Rule = Empty | opLevel8 + operand; // TODO: rhs operand not operand
+			conditionRhsOpt.Rule = Empty | opLevel8 + operand | IS + (Empty | NOT) + NULL; // TODO: rhs operand not operand
 			operand.Rule = value | column;
-			value.Rule = NULL | string_literal | number;
+			value.Rule = string_literal | number;
 			column.Rule = Id;
 
 			opLevel8.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;

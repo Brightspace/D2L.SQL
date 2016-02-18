@@ -53,7 +53,7 @@
     <Compile Include="Validation\ITablePolicy.cs" />
     <Compile Include="Validation\IValidator.cs" />
     <Compile Include="Validation\SqlValidationException.cs" />
-    <Compile Include="Validation\Validator.cs" />
+    <Compile Include="Validation\ReadOnlyValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

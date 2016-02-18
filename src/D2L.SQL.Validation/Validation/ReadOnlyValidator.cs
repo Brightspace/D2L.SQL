@@ -1,35 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using D2L.SQL.Language;
+using Irony.Parsing;
 
 namespace D2L.SQL.Validation {
 	/// <summary>
 	/// A configurable validator for read-only (i.e. SELECTs) SQL
 	/// </summary>
 	public sealed class ReadOnlyValidator : IValidator {
-		private readonly HashSet<string> m_allowedFunctions = new HashSet<string>();
 		private readonly ITablePolicy m_tablePolicy;
+		private readonly Parser m_parser;
+
+		private sealed class DefaultTablePolicy : ITablePolicy {
+			public bool CheckIfTableIsAllowed( string schema, string tableName ) {
+				return true;
+			}
+		}
 
 		/// <summary>
 		/// Construct a ReadOnlyValidator 
 		/// </summary>
 		/// <param name="tablePolicy">A table policy</param>
 		public ReadOnlyValidator(
-			ITablePolicy tablePolicy
+			ITablePolicy tablePolicy = null
 		) {
-			m_tablePolicy = tablePolicy;
+			m_tablePolicy = tablePolicy ?? new DefaultTablePolicy();
+			m_parser = new Parser( new SqlGrammar() );
 		}
 
 		/// <inheritdoc/>
-		string IValidator.Validate( string sql ) {
-			throw new NotImplementedException();
-		}
+		string IValidator.Sanitize( string sql ) {
+			ParseTree parseTree = m_parser.Parse( sql );
+			
+			if( parseTree.Root == null ) {
+				throw new SqlValidationException();
+			}
 
-		/// <summary>
-		/// The functions which are allowed in the expression sub-grammar (e.g. COUNT, AVG)
-		/// The names are case-insensitive (TODO: make sure this is true or rewrite docs)
-		/// </summary>
-		public HashSet<string> AllowedFunctions {
-			get { return m_allowedFunctions; }
+			return sql;
 		}
 
 		/// <summary>
