@@ -58,6 +58,7 @@ namespace D2L.SQL.Language {
 			var DESC = ToTerm( "DESC" );
 			var NULLS = ToTerm( "NULLS" );
 			var LAST = ToTerm( "LAST" );
+			var IN = ToTerm( "IN" );
 			#endregion
 
 			#region Non-terminals
@@ -110,6 +111,8 @@ namespace D2L.SQL.Language {
 			var comparisonOperator = new NonTerminal( "opLevel8" );
 			var value = new NonTerminal( "value" );
 			var column = new NonTerminal( "column" );
+			var inClause = new NonTerminal( "inClause" );
+			var inItems = new NonTerminal( "inItems" );
 			#endregion
 
 			#region Base grammar
@@ -170,12 +173,15 @@ namespace D2L.SQL.Language {
 			booleanCondition.Rule = notOpt + condition;
 			notOpt.Rule = Empty | NOT;
 			condition.Rule = operand + conditionRhsOpt;
-			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL; // TODO: rhs operand not operand
+			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL | inClause; // TODO: rhs operand not operand
 			operand.Rule = value | column;
 			value.Rule = string_literal | number;
 			column.Rule = Id;
 
 			comparisonOperator.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;
+
+			inClause.Rule = notOpt + IN + "(" + ( select | inItems ) + ")";
+			inItems.Rule = MakePlusRule( inItems, comma, value );
 
 			// Id
 			Id.Rule = Id_simple + ( Empty | dot + Id_simple );
