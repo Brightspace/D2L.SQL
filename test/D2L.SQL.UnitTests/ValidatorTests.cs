@@ -63,6 +63,9 @@ namespace D2L.SQL.UnitTests {
 		[TestCase( "SELECT id, colour from CATS WHERE ID NOT IN (1, 2, 3)" )]
 		[TestCase( "select * from target where id in (SELECT id FROM source WHERE COST > 10)" )]
 		[TestCase( "SELECT id, weight from CATS WHERE weight BETWEEN 10 AND 20;" )]
+		[TestCase( "SELECT id, weight from CATS WHERE weight NOT BETWEEN 10 AND 20;" )]
+		[TestCase( "SELECT id, colour from CATS WHERE EXISTS (SELECT colour FROM wallpapers)" )]
+		[TestCase( "SELECT id, colour from CATS WHERE NOT EXISTS (SELECT colour FROM wallpapers)" )]
 		public void SanitizeReturnsInput_GivenValidSql( string sql ) {
 			// The interface doesn't actually guarantee that the output equals the input, but this is the easiest test given the current implementation
 			Assert.That( m_validator.Sanitize( sql ), Is.EqualTo( sql ) );
