@@ -59,6 +59,7 @@ namespace D2L.SQL.Language {
 			var NULLS = ToTerm( "NULLS" );
 			var LAST = ToTerm( "LAST" );
 			var IN = ToTerm( "IN" );
+			var BETWEEN = ToTerm( "BETWEEN" );
 			#endregion
 
 			#region Non-terminals
@@ -113,6 +114,7 @@ namespace D2L.SQL.Language {
 			var column = new NonTerminal( "column" );
 			var inClause = new NonTerminal( "inClause" );
 			var inItems = new NonTerminal( "inItems" );
+			var betweenClause = new NonTerminal( "betweenClause" );
 			#endregion
 
 			#region Base grammar
@@ -173,7 +175,7 @@ namespace D2L.SQL.Language {
 			booleanCondition.Rule = notOpt + condition;
 			notOpt.Rule = Empty | NOT;
 			condition.Rule = operand + conditionRhsOpt;
-			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL | inClause; // TODO: rhs operand not operand
+			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL | inClause | betweenClause; // TODO: rhs operand not operand
 			operand.Rule = value | column;
 			value.Rule = string_literal | number;
 			column.Rule = Id;
@@ -182,6 +184,8 @@ namespace D2L.SQL.Language {
 
 			inClause.Rule = notOpt + IN + "(" + ( select | inItems ) + ")";
 			inItems.Rule = MakePlusRule( inItems, comma, value );
+
+			betweenClause.Rule = notOpt + BETWEEN + operand + AND + operand;
 
 			// Id
 			Id.Rule = Id_simple + ( Empty | dot + Id_simple );

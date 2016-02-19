@@ -59,8 +59,10 @@ namespace D2L.SQL.UnitTests {
 					LEFT OUTER JOIN (SELECT UID, TAGV FROM VBSPACE_UIDS WHERE TAGV IS NOT NULL) TV3 ON TA.TOOLID= TV3.UID;")]
 		[TestCase( "SELECT info as theInfo, other FROM atable GROUP BY x HAVING y = 4 AND g IS NOT NULL ORDER BY time" )]
 		[TestCase( "SELECT column from A WHERE column like 'my data'" )]
-		[TestCase( "SELECT id, colour from CATS WHERE A IN (1, 2, 3)" )]
-		[TestCase( "select * from target where id in (SELECT id FROM source WHERE COST > 10)")]
+		[TestCase( "SELECT id, colour from CATS WHERE ID IN (1, 2, 3)" )]
+		[TestCase( "SELECT id, colour from CATS WHERE ID NOT IN (1, 2, 3)" )]
+		[TestCase( "select * from target where id in (SELECT id FROM source WHERE COST > 10)" )]
+		[TestCase( "SELECT id, weight from CATS WHERE weight BETWEEN 10 AND 20;" )]
 		public void SanitizeReturnsInput_GivenValidSql( string sql ) {
 			// The interface doesn't actually guarantee that the output equals the input, but this is the easiest test given the current implementation
 			Assert.That( m_validator.Sanitize( sql ), Is.EqualTo( sql ) );
