@@ -104,6 +104,7 @@ namespace D2L.SQL.Language {
 			var stmtLine = new NonTerminal( "stmtLine" );
 			var semiOpt = new NonTerminal( "semiOpt" );
 			var stmtList = new NonTerminal( "stmtList" );
+			var tablespecList = new NonTerminal( "tablespecList" );
 			var tableSpec = new NonTerminal( "tableSpec" );
 			var aliasedTableRef = new NonTerminal( "aliasedTableRef" );
 			var nullsDir = new NonTerminal( "nullsDir" );
@@ -150,7 +151,8 @@ namespace D2L.SQL.Language {
 			selectExpr.Rule = "*" | Id_simple + ".*" | expression + asOpt;
 
 			// FROM
-			from.Rule = FROM + tableSpec;
+			from.Rule = FROM + tablespecList;
+			tablespecList.Rule = MakePlusRule( tablespecList, comma, tableSpec );
 			tableSpec.Rule = aliasedTableRef | "(" + select + ")" + asOpt;
 			aliasedTableRef.Rule = Id_simple + asOpt;
 
