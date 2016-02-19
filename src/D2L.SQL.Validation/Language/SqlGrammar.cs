@@ -61,6 +61,11 @@ namespace D2L.SQL.Language {
 			var IN = ToTerm( "IN" );
 			var BETWEEN = ToTerm( "BETWEEN" );
 			var EXISTS = ToTerm( "EXISTS" );
+			var COUNT = ToTerm( "COUNT" );
+			var MAX = ToTerm( "MAX" );
+			var MIN = ToTerm( "MIN" );
+			var AVG = ToTerm( "AVG" );
+			var SUM = ToTerm( "SUM" );
 			#endregion
 
 			#region Non-terminals
@@ -117,6 +122,8 @@ namespace D2L.SQL.Language {
 			var inItems = new NonTerminal( "inItems" );
 			var betweenClause = new NonTerminal( "betweenClause" );
 			var existsClause = new NonTerminal( "existsClause" );
+			var function = new NonTerminal( "function" );
+		
 			#endregion
 
 			#region Base grammar
@@ -178,7 +185,7 @@ namespace D2L.SQL.Language {
 			notOpt.Rule = Empty | NOT;
 			condition.Rule = operand + conditionRhsOpt | existsClause;
 			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL | inClause | betweenClause; // TODO: rhs operand not operand
-			operand.Rule = value | column;
+			operand.Rule = value | column | function;
 			value.Rule = string_literal | number;
 			column.Rule = Id;
 
@@ -190,6 +197,9 @@ namespace D2L.SQL.Language {
 			betweenClause.Rule = notOpt + BETWEEN + operand + AND + operand;
 
 			existsClause.Rule = notOpt + EXISTS + "(" + select + ")";
+
+			// functions
+			function.Rule = ( COUNT | MAX | MIN | AVG | SUM ) + "(" + ( operand | "*" ) + ")";
 
 			// Id
 			Id.Rule = Id_simple + ( Empty | dot + Id_simple );
