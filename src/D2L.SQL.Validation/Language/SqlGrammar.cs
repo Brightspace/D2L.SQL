@@ -81,6 +81,7 @@ namespace D2L.SQL.Language {
 			var orderDirOpt = new NonTerminal( "orderDirOpt" );
 			var whereOpt = new NonTerminal( "whereOpt" );
 			var expression = new NonTerminal( "expression" );
+			var subexpression = new NonTerminal( "subexpression" );
 			var exprList = new NonTerminal( "exprList" );
 			var filterOpt = new NonTerminal( "filterOpt" );
 			var selectExprList = new NonTerminal( "selectExprList" );
@@ -179,7 +180,8 @@ namespace D2L.SQL.Language {
 
 			#region Expression grammar
 			exprList.Rule = MakePlusRule( exprList, comma, expression );
-			expression.Rule = MakePlusRule( expression, OR, andCondition );
+			expression.Rule = "(" + subexpression + ")" | subexpression;
+			subexpression.Rule = MakePlusRule( subexpression, OR, andCondition );
 			andCondition.Rule = MakePlusRule( andCondition, AND, condition );
 			booleanCondition.Rule = notOpt + condition;
 			notOpt.Rule = Empty | NOT;

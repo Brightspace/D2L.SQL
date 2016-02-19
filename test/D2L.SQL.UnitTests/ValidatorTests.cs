@@ -67,6 +67,7 @@ namespace D2L.SQL.UnitTests {
 		[TestCase( "SELECT id, colour from CATS WHERE EXISTS (SELECT colour FROM wallpapers)" )]
 		[TestCase( "SELECT id, colour from CATS WHERE NOT EXISTS (SELECT colour FROM wallpapers)" )]
 		[TestCase( "SELECT COUNT(*) FROM TEST_WEB_STAT WHERE HOST = 'SYSTEM'" )]
+		[TestCase( "SELECT mt.HOST, nmt.HOST, mt.DOMAIN, nmt.DOMAIN FROM TEST_WEB_STAT_MULTI_TENANT mt INNER JOIN TEST_WEB_STAT nmt ON (mt.HOST = nmt.HOST) LIMIT 1" )]
 		public void SanitizeReturnsInput_GivenValidSql( string sql ) {
 			// The interface doesn't actually guarantee that the output equals the input, but this is the easiest test given the current implementation
 			Assert.That( m_validator.Sanitize( sql ), Is.EqualTo( sql ) );
