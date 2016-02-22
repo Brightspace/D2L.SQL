@@ -99,7 +99,6 @@ namespace D2L.SQL.Language {
 			var condition = new NonTerminal( "condtion" );
 			var conditionRhsOpt = new NonTerminal( "conditionRhsOpt" );
 			var unOp = new NonTerminal( "unOp" );
-			var binOp = new NonTerminal( "binOp" );
 			var notOpt = new NonTerminal( "notOpt" );
 			var stmtLine = new NonTerminal( "stmtLine" );
 			var semiOpt = new NonTerminal( "semiOpt" );
@@ -214,7 +213,6 @@ namespace D2L.SQL.Language {
 			MarkPunctuation( ",", "(", ")" );
 			MarkPunctuation( semiOpt, asKeywordOpt );
 			MarkTransient( stmt, aliasOpt, asKeywordOpt, stmtLine, unOp, tuple );
-			binOp.SetFlag( TermFlags.InheritPrecedence );
 		}
 	}
 }
