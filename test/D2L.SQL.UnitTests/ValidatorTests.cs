@@ -25,6 +25,7 @@ namespace D2L.SQL.UnitTests {
 						multiline
 						comment */ atable" )]
 		[TestCase( "SELECT * FROM table WHERE col IS NULL" )]
+		[TestCase( "SELECT * FROM table WHERE col IS NULL UNION ALL SELECT info as theInfo, other FROM atable" )]
 		[TestCase( "SELECT * FROM table WHERE col IS NOT NULL" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable) ON table.a = othertable.b" )]
 		[TestCase( "SELECT * FROM table JOIN (SELECT * FROM othertable)/* internal comment */ ON table.a = othertable.b" )]
