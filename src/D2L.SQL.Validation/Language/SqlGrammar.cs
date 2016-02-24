@@ -20,6 +20,9 @@ namespace D2L.SQL.Language {
 			number.DefaultIntTypes = new TypeCode[] { TypeCode.Int64 };
 			var string_literal = new StringLiteral( "string", "'", StringOptions.AllowsDoubledQuote );
 			var Id_simple = TerminalFactory.CreateSqlExtIdentifier( this, "id_simple" );
+			// column names, unlike other ids, may start with a numeral
+			var columnId = TerminalFactory.CreateSqlExtIdentifier( this, "columnId" );
+			columnId.AllFirstChars += "0123456789";
 
 			var comma = ToTerm( "," );
 			var dot = ToTerm( "." );
@@ -205,7 +208,7 @@ namespace D2L.SQL.Language {
 			function.Rule = ( COUNT | MAX | MIN | AVG | SUM ) + "(" + ( operand | "*" ) + ")";
 
 			// Id
-			Id.Rule = Id_simple + ( Empty | dot + Id_simple );
+			Id.Rule = Id_simple + ( Empty | dot + columnId );
 			idlist.Rule = MakePlusRule( idlist, comma, Id );
 
 			#endregion
