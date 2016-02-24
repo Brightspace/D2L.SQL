@@ -13,7 +13,7 @@ namespace D2L.SQL.UnitTests {
 			m_validator = new ReadOnlyValidator();
 		}
 
-		[TestCase( "SELECT H.10T, TAGS[2] FROM VUSER_INTERACTIONS_AGGR WHERE TIMESTAMP = 1352419200000 AND ACTIVITYTYPE = 3" )]
+		[TestCase( "SELECT F.10ABC, TAGS[2] FROM SOMEVIEW WHERE TIMESTAMP = 1352419200000 AND WIDGETTYPE = 3" )]
 		[TestCase( "SELECT * FROM atable" )]
 		[TestCase( "SELECT columnA, column2, THREE FROM atable" )]
 		[TestCase( "SELECT info as theInfo, other FROM atable" )]
