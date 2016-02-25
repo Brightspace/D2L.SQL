@@ -41,10 +41,13 @@ so only tables in the default schema/tablespace are usable.
 
 ### Why Irony?
 
-There are few SQL parsers available for .NET, and using Irony has the key advantage that we can define only the subset of SQL that we want to accept.
+There are few SQL parsers available for .NET, and using a parser library like Irony has the key advantage that we can define only the subset of SQL that we want to accept. Irony is the
+only native C# parser library in common use, and while its documentation is sparse, it is reasonably well-supported via discussions.
 
-Getting a complete grammar would be achievable in less code by using an existing one, such as the Apache Phoenix jdbc driver (via jni), or the MS sql parser. However, we would then
+Getting a complete grammar would be achievable in less code by using an existing parser, such as the Apache Phoenix jdbc driver (via jni), or the MS sql parser. However, we would then
 have to write code to traverse the resulting parse tree, and ensure that no branches are present that might alter data. This approach lets us effectively whitelist the valid expressions
 instead.
 
 Additionally, Irony is elegant enough that the bulk of the code here is simply declarative statements contained in a single class.
+
+
