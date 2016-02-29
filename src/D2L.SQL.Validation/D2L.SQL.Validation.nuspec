@@ -10,6 +10,7 @@
     <projectUrl>https://github.com/Brightspace/D2L.SQL</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<copyright>Copyright 2016</copyright>
+		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+		<copyright>Copyright 2016 D2L Corporation</copyright>
 	</metadata>
 </package>
