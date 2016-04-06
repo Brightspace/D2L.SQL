@@ -193,7 +193,7 @@ namespace D2L.SQL.Language {
 			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL | inClause | betweenClause; // TODO: rhs operand not operand
 			operand.Rule = value | column | function;
 			value.Rule = string_literal | number;
-			column.Rule = Id;
+			column.Rule = MakePlusRule( column, dot, Id );
 
 			comparisonOperator.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;
 
