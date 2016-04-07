@@ -20,9 +20,6 @@ namespace D2L.SQL.Language {
 			number.DefaultIntTypes = new TypeCode[] { TypeCode.Int64 };
 			var string_literal = new StringLiteral( "string", "'", StringOptions.AllowsDoubledQuote );
 			var Id_simple = TerminalFactory.CreateSqlExtIdentifier( this, "id_simple" );
-			// column names, unlike other ids, may start with a numeral
-			var columnId = TerminalFactory.CreateSqlExtIdentifier( this, "columnId" );
-			columnId.AllFirstChars += "0123456789";
 
 			var comma = ToTerm( "," );
 			var dot = ToTerm( "." );
@@ -72,13 +69,11 @@ namespace D2L.SQL.Language {
 			#endregion
 
 			#region Non-terminals
-			var Id = new NonTerminal( "Id" );
 			var stmt = new NonTerminal( "stmt" );
 			var select = new NonTerminal( "select" );
 			var selectStmt = new NonTerminal( "selectStmt" );
 			var union = new NonTerminal( "union" );
 			var unionList = new NonTerminal( "unionList" );
-			var idlist = new NonTerminal( "idlist" );
 			var orderList = new NonTerminal( "orderList" );
 			var order = new NonTerminal( "order" );
 			var orderDirOpt = new NonTerminal( "orderDirOpt" );
@@ -172,7 +167,7 @@ namespace D2L.SQL.Language {
 			// ORDER BY
 			orderByOpt.Rule = Empty | ORDER + BY + orderList;
 			orderList.Rule = MakePlusRule( orderList, comma, order );
-			order.Rule = Id + orderDirOpt + nullsOpt;
+			order.Rule = column + orderDirOpt + nullsOpt;
 			orderDirOpt.Rule = Empty | ASC | DESC;
 			nullsOpt.Rule = Empty | NULLS + nullsDir;
 			nullsDir.Rule = FIRST | LAST;
@@ -193,8 +188,7 @@ namespace D2L.SQL.Language {
 			conditionRhsOpt.Rule = Empty | comparisonOperator + operand | IS + ( Empty | NOT ) + NULL | inClause | betweenClause; // TODO: rhs operand not operand
 			operand.Rule = value | column | function;
 			value.Rule = string_literal | number;
-			column.Rule = MakePlusRule( column, dot, Id );
-
+			column.Rule = Id_simple + ( Empty | dot + Id_simple + ( Empty | dot + Id_simple ) );
 			comparisonOperator.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;
 
 			inClause.Rule = notOpt + IN + "(" + ( select | inItems ) + ")";
@@ -206,10 +200,6 @@ namespace D2L.SQL.Language {
 
 			// functions
 			function.Rule = ( COUNT | MAX | MIN | AVG | SUM ) + "(" + ( operand | "*" ) + ")";
-
-			// Id
-			Id.Rule = Id_simple + ( Empty | dot + columnId );
-			idlist.Rule = MakePlusRule( idlist, comma, Id );
 
 			#endregion
 
