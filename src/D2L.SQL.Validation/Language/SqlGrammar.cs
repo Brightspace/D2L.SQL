@@ -69,7 +69,6 @@ namespace D2L.SQL.Language {
 			#endregion
 
 			#region Non-terminals
-			var TableAliasOpt = new NonTerminal( "IdOpt" );
 			var stmt = new NonTerminal( "stmt" );
 			var select = new NonTerminal( "select" );
 			var selectStmt = new NonTerminal( "selectStmt" );
@@ -190,7 +189,6 @@ namespace D2L.SQL.Language {
 			operand.Rule = value | column | function;
 			value.Rule = string_literal | number;
 			column.Rule = Id_simple + ( Empty | dot + Id_simple + ( Empty | dot + Id_simple ) );
-			TableAliasOpt.Rule = Empty | ( Id_simple + dot );
 			comparisonOperator.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;
 
 			inClause.Rule = notOpt + IN + "(" + ( select | inItems ) + ")";
