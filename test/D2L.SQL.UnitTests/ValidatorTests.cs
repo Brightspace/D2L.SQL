@@ -15,6 +15,7 @@ namespace D2L.SQL.UnitTests {
 
 		[TestCase( "SELECT F.10ABC, TAGS[2] FROM SOMEVIEW WHERE TIMESTAMP = 1352419200000 AND WIDGETTYPE = 3" )]
 		[TestCase( "SELECT * FROM atable" )]
+		[TestCase( "SELECT \"~!@#$%^&*()_+\" FROM SPECIAL_CHARS" )]
 		[TestCase( "SELECT columnA, column2, THREE FROM atable" )]
 		[TestCase( "SELECT info as theInfo, other FROM atable" )]
 		[TestCase( @"SELECT info as theInfo, 
