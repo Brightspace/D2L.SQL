@@ -172,7 +172,7 @@ namespace D2L.SQL.Language {
 			// ORDER BY
 			orderByOpt.Rule = Empty | ORDER + BY + orderList;
 			orderList.Rule = MakePlusRule( orderList, comma, order );
-			order.Rule = Id + orderDirOpt + nullsOpt;
+			order.Rule = column + orderDirOpt + nullsOpt;
 			orderDirOpt.Rule = Empty | ASC | DESC;
 			nullsOpt.Rule = Empty | NULLS + nullsDir;
 			nullsDir.Rule = FIRST | LAST;
