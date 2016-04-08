@@ -106,6 +106,10 @@ namespace D2L.SQL.UnitTests {
 					GROUP BY PHOENIX_TABLE.A.USERID
 					HAVING PHOENIX_TABLE.A.USERID = 1234", 
 					TestName = "Compound column names in HAVING")]
+		[TestCase( @"SELECT DEPT.A.CONTEXTID, DEPT.A.V, DEPT.A.TIMESTAMP, DEPT.A.ACTORID, DEPT.A.TYPE
+					FROM DEPT DEPT
+					WHERE (DEPT.A.CONTEXTID not like '66%')
+					ORDER BY DEPT.A.TIMESTAMP DESC", TestName = "NOT LIKE" )]
 		public void SanitizeReturnsInput_GivenValidSql( string sql ) {
 			// The interface doesn't actually guarantee that the output equals the input, but this is the easiest test given the current implementation
 			Assert.That( m_validator.Sanitize( sql ), Is.EqualTo( sql ) );

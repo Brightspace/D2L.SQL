@@ -189,7 +189,7 @@ namespace D2L.SQL.Language {
 			operand.Rule = value | column | function;
 			value.Rule = string_literal | number;
 			column.Rule = Id_simple + ( Empty | dot + Id_simple + ( Empty | dot + Id_simple ) );
-			comparisonOperator.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | LIKE;
+			comparisonOperator.Rule = EQ | LT | GT | LTE | GTE | NEQ1 | NEQ2 | (Empty | NOT ) + LIKE;
 
 			inClause.Rule = notOpt + IN + "(" + ( select | inItems ) + ")";
 			inItems.Rule = MakePlusRule( inItems, comma, value );
